@@ -39,7 +39,17 @@ if (!isset($_SESSION['user_id'])) {
     $minutes = round($summary->fetch_assoc()['total'] / 60, 1);
     echo "<h3>🕒 Today's Focus Time: $minutes minutes</h3>";
     ?>
-
+<a href="task_list.php" style="
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;">
+    🕒 Tasks with Timer Modes
+</a>
     <!-- Task List -->
     <h2>Your Tasks</h2>
     <a href="add_task.php">+ Add New Task</a>
@@ -59,5 +69,7 @@ if (!isset($_SESSION['user_id'])) {
     </ul>
 
     <a href="history.php">📜 View Focus History</a>
+    <a href="enhanced_history.php">📊 View Enhanced Focus History</a>
 </body>
 </html>
+
