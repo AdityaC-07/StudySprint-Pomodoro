@@ -33,7 +33,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html>
-<head><title>Login</title></head>
+<head>
+    <title>Login</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        input {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        button {
+            background-color: #6200ea;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3700b3;
+        }
+        a {
+            color: #bb86fc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
 <body>
     <h2>🔐 Login</h2>
     <form method="POST">
@@ -45,3 +81,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <p>Don't have an account? <a href="signup.php">Sign up here</a></p>
 </body>
 </html>
+
+<?php include 'theme.php'; ?>
+<style>
+    body {
+        background-color: <?= $bodyBg ?>;
+        color: <?= $textColor ?>;
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    .action-btn, button {
+        background-color: <?= $accent ?>;
+        color: #fff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .card, .container, .timer-container {
+        background-color: <?= $cardBg ?>;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+    a {
+        color: <?= $accent ?>;
+    }
+
+    .action-btn:hover, button:hover {
+        background-color: #a07800;
+    }
+</style>
