@@ -1,22 +1,117 @@
-// Modify add_task.php to include categories
 <?php include 'db.php'; ?>
 <!DOCTYPE html>
 <html>
-<head><title>Add Task</title></head>
+<head>
+    <title>Add Task</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #2d2d2d;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        h2 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        label {
+            margin-bottom: 5px;
+            display: block;
+            color: #aaaaaa;
+        }
+        
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #3a3a3a;
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
 <body>
-<h2>Add a New Task</h2>
-<form method="POST">
-    Title: <input type="text" name="title" required><br><br>
-    Category: 
-    <select name="category">
-        <option value="work">Work</option>
-        <option value="study">Study</option>
-        <option value="personal">Personal</option>
-        <option value="other">Other</option>
-    </select><br><br>
-    Notes: <textarea name="notes"></textarea><br><br>
-    <button type="submit" name="add">Add Task</button>
-</form>
+    <div class="container">
+        <h2>Add a New Task</h2>
+        <form method="POST">
+            <div>
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div>
+                <label for="category">Category:</label>
+                <select id="category" name="category">
+                    <option value="work">Work</option>
+                    <option value="study">Study</option>
+                    <option value="personal">Personal</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="notes">Notes:</label>
+                <textarea id="notes" name="notes"></textarea>
+            </div>
+            
+            <button type="submit" name="add">Add Task</button>
+        </form>
+        <a href="index.php">⬅ Back to Tasks</a>
+    </div>
 
 <?php
 if (isset($_POST['add'])) {
@@ -31,26 +126,45 @@ if (isset($_POST['add'])) {
         $conn->query("ALTER TABLE tasks ADD COLUMN category VARCHAR(50)");
     }
     
-    $conn->query("INSERT INTO tasks (title, notes, category) VALUES ('$title', '$notes', '$category')");
+    $conn->query("INSERT INTO tasks (title, notes, category) VALUES
+    ('$title', '$notes', '$category')");
+    
     header("Location: index.php");
 }
 ?>
 </body>
 </html>
+<?php include 'theme.php'; ?>
+<style>
+    body {
+        background-color: <?= $bodyBg ?>;
+        color: <?= $textColor ?>;
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
 
-// Also modify index.php to display categories
-// Add this to your task listing loop in index.php:
-<?php
-$tasks = $conn->query("SELECT * FROM tasks ORDER BY id DESC");
-while ($row = $tasks->fetch_assoc()) {
-    $category = isset($row['category']) ? $row['category'] : 'uncategorized';
-    echo "<li>
-        <span class='category-badge $category'>$category</span>
-        <strong>{$row['title']}</strong><br>
-        <em>{$row['notes']}</em><br>
-        <a href='timer.php?task_id={$row['id']}'>Start Pomodoro</a> |
-        <a href='complete_task.php?id={$row['id']}'>Mark Complete</a> |
-        <a href='delete_task.php?id={$row['id']}'>Delete</a>
-    </li><hr>";
-}
-?>
+    .action-btn, button {
+        background-color: <?= $accent ?>;
+        color: #fff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .card, .container, .timer-container {
+        background-color: <?= $cardBg ?>;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+    a {
+        color: <?= $accent ?>;
+    }
+
+    .action-btn:hover, button:hover {
+        background-color: #a07800;
+    }
+</style>
