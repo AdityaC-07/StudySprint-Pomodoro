@@ -7,6 +7,11 @@ $duration = $_GET['duration'];
 $mode = $_GET['mode'] ?? 'standard';
 $time = time(); // Current Unix timestamp
 
+// Make sure duration is a reasonable value
+if (!is_numeric($duration) || $duration <= 0) {
+    $duration = 60; // default to 1 minute if invalid
+}
+
 // Set sessions until long break based on mode
 switch ($mode) {
     case 'extended':
@@ -24,7 +29,7 @@ switch ($mode) {
 // Store this for future reference
 $_SESSION['sessions_until_long_break'] = $sessions_until_long_break;
 
-// Insert the completed pomodoro into history with mode information
+// Store the mode information
 $mode_info = $conn->real_escape_string("Mode: $mode");
 
 // Check if notes column exists in history table
@@ -42,8 +47,7 @@ if ($stmt) {
     $stmt->close();
 } else {
     // Fallback to regular query if prepare fails
-    $conn->query("INSERT INTO history (task_id, duration, timestamp, notes) 
-                 VALUES ('$task_id', '$duration', '$time', '$mode_info')");
+    $conn->query("INSERT INTO history (task_id, duration, timestamp, notes) VALUES ('$task_id', '$duration', '$time', '$mode_info')");
 }
 
 // Increment pomodoro count
