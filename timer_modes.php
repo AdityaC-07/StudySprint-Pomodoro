@@ -1,35 +1,57 @@
-<?php include 'db.php'; ?>
+<?php include 'db.php'; include 'theme.php'; ?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Timer Modes</title>
     <style>
+        body {
+            background-color: <?= $bodyBg ?>;
+            color: <?= $textColor ?>;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
         .mode-card {
-            border: 1px solid #ddd;
+            background-color: <?= $cardBg ?>;
+            color: <?= $textColor ?>;
+            border: 1px solid #ccc;
             border-radius: 8px;
             padding: 20px;
             margin: 15px 0;
-            background-color: #f9f9f9;
         }
+
         .mode-card:hover {
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+
         .start-btn {
-            background-color: #28a745;
+            background-color: <?= $accent ?>;
             color: white;
-            border: none;
             padding: 8px 16px;
             border-radius: 4px;
-            cursor: pointer;
             text-decoration: none;
             display: inline-block;
             margin-top: 10px;
+            border: none;
+        }
+
+        .start-btn:hover {
+            background-color: <?= $hoverAccent ?>;
+        }
+
+        a {
+            color: <?= $accent ?>;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <h2>🕒 Select Timer Mode</h2>
-    
+
     <div class="mode-card">
         <h3>Standard Pomodoro</h3>
         <p>• Work: 25 minutes</p>
@@ -37,7 +59,7 @@
         <p>• Long Break: 15 minutes (after 4 pomodoros)</p>
         <a class="start-btn" href="pomodoro_timer.php?task_id=<?= $_GET['task_id'] ?>&mode=standard">Start</a>
     </div>
-    
+
     <div class="mode-card">
         <h3>Extended Focus</h3>
         <p>• Work: 50 minutes</p>
@@ -45,7 +67,7 @@
         <p>• Long Break: 30 minutes (after 3 sessions)</p>
         <a class="start-btn" href="pomodoro_timer.php?task_id=<?= $_GET['task_id'] ?>&mode=extended&duration=3000">Start</a>
     </div>
-    
+
     <div class="mode-card">
         <h3>Quick Sprints</h3>
         <p>• Work: 15 minutes</p>
@@ -53,16 +75,24 @@
         <p>• Long Break: 10 minutes (after 6 sessions)</p>
         <a class="start-btn" href="pomodoro_timer.php?task_id=<?= $_GET['task_id'] ?>&mode=quick&duration=900">Start</a>
     </div>
-    
-    <p><a href="index.php">⬅ Back to Tasks</a></p>
-</body>
-</html>
-
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html>
 <head>
     <title>Custom Timer</title>
     <style>
+        input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: <?= ($theme === 'dark') ? '#3a3a3a' : '#ffffff' ?>;
+    color: <?= $textColor ?>;
+}
+
+label {
+    color: <?= $textColor ?>;
+}
+
         .custom-timer-form {
             max-width: 400px;
             margin: 0 auto;
@@ -142,5 +172,10 @@
             window.location.href = `pomodoro_timer.php?task_id=${taskId}&mode=custom&duration=${duration}&short_break=${shortBreakSecs}&long_break=${longBreakSecs}`;
         });
     </script>
+</body>
+</html>
+
+
+    <p><a href="index.php">⬅ Back to Tasks</a></p>
 </body>
 </html>
