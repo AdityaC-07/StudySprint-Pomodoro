@@ -1,0 +1,88 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 400px;
+    margin: 0;
+    padding: 0;
+  }
+  .timer-container {
+    text-align: center;
+    width: 300px;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  .app-header {
+    margin-bottom: 20px;
+  }
+  .app-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #e53935;
+  }
+  .circle-timer {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 20px;
+  }
+  .timer-circle {
+    fill: none;
+    stroke-width: 8;
+  }
+  .timer-background {
+    stroke: #ccc;
+  }
+  .timer-progress {
+    stroke: #e53935;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dashoffset 1s linear;
+  }
+  .timer-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .timer-time {
+    font-size: 36px;
+    font-weight: bold;
+  }
+  .control-button {
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #e53935;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    cursor: pointer;
+  }
+  .control-button:hover {
+    background-color: #d32f2f;
+  }
+  .volume-control {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .volume-control label {
+    margin-right: 10px;
+    font-size: 12px;
+  }
+  .volume-control input {
+    width: 80px;
+  }

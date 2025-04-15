@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pomodoro Timer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="timer-container">
+    <div class="app-header">
+      <p class="app-title">Pomodoro</p>
+    </div>
+    <div class="circle-timer">
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        <circle class="timer-circle timer-background" cx="100" cy="100" r="90" />
+        <circle id="progress-ring" class="timer-circle timer-progress" cx="100" cy="100" r="90" />
+      </svg>
+      <div class="timer-text">
+        <p id="timer" class="timer-time">25:00</p>
+        <p class="timer-label">WORK</p>
+      </div>
+    </div>
+    <button id="controlBtn" class="control-button">⏸</button>
+    <div class="volume-control">
+      <label for="volume">🔊</label>
+      <input type="range" id="volume" min="0" max="1" step="0.1" value="0.7">
+    </div>
+    <audio id="timerSound" preload="auto">
+      <source src="timer-sound.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
