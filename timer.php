@@ -1,11 +1,42 @@
 <?php
 include 'theme.php'; // Include theme.php at the very top
 $task_id = $_GET['task_id'];
+$duration = $_GET['duration'] ?? 1500; // Default to 25 minutes
+
+// Define theme-specific timer colors
+switch ($theme) {
+    case 'dark':
+        $timerBgColor = "#3a3a3a";
+        $timerProgressColor = "#e53935";
+        break;
+    case 'green':
+        $timerBgColor = "#e0e0e0";
+        $timerProgressColor = "#2e8b57";
+        break;
+    case 'light':
+        $timerBgColor = "#f5f5f5";
+        $timerProgressColor = "#c49700";
+        break;
+    case 'blue':
+        $timerBgColor = "#e3f2fd";
+        $timerProgressColor = "#1976d2";
+        break;
+    case 'solarized':
+        $timerBgColor = "#eee8d5";
+        $timerProgressColor = "#b58900";
+        break;
+    default:
+        $timerBgColor = "#3a3a3a";
+        $timerProgressColor = "#e53935";
+}
+
+// Set label color based on theme
+$labelColor = ($theme === 'dark') ? '#aaa' : '#666';
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-<title>Pomodoro Timer</title>
+<title>Timer</title>
 <style>
 body {
     font-family: 'Arial', sans-serif;
@@ -53,10 +84,10 @@ body {
     stroke-width: 8;
 }
 .timer-background {
-    stroke: #ccc;
+    stroke: <?= $timerBgColor ?>;
 }
 .timer-progress {
-    stroke: #e53935;
+    stroke: <?= $timerProgressColor ?>;
     stroke-linecap: round;
     transform: rotate(-90deg);
     transform-origin: center;
@@ -76,7 +107,7 @@ body {
 }
 .timer-label {
     font-size: 14px;
-    color: <?= ($theme === 'dark') ? '#aaa' : '#666' ?>;
+    color: <?= $labelColor ?>;
     text-transform: uppercase;
     margin-top: 5px;
 }
@@ -122,7 +153,7 @@ a {
 <body>
 <div class="timer-container">
     <div class="app-header">
-        <p class="app-title">Pomodoro</p>
+        <p class="app-title">Timer</p>
         <span class="close-icon">×</span>
     </div>
     <div class="circle-timer">
@@ -131,11 +162,11 @@ a {
             <circle id="progress-ring" class="timer-circle timer-progress" cx="100" cy="100" r="90" />
         </svg>
         <div class="timer-text">
-            <p id="timer" class="timer-time">25:00</p>
-            <p class="timer-label">WORK</p>
+            <p id="timer" class="timer-time"><?= floor($duration / 60) ?>:00</p>
+            <p class="timer-label">TIMER</p>
         </div>
     </div>
-    <button id="controlBtn" class="control-button">⏸</button>
+    <button id="controlBtn" class="control-button">▶</button>
     
     <!-- Volume control -->
     <div class="volume-control">
@@ -155,18 +186,22 @@ a {
 </div>
 
 <script>
+// Circle properties
 const circle = document.getElementById('progress-ring');
 const radius = circle.r.baseVal.value;
 const circumference = 2 * Math.PI * radius;
+
+// Set initial properties
 circle.style.strokeDasharray = `${circumference} ${circumference}`;
 circle.style.strokeDashoffset = 0;
 
-let seconds = 1500;
+// Timer variables
+let seconds = <?= $duration ?>;
 const totalSeconds = seconds;
 let elapsedTime = 0;
-let startTime = Date.now();
-let isPaused = false;
-let intervalId = setInterval(updateTimer, 1000);
+let startTime = null;
+let isPaused = true;
+let intervalId = null;
 const timerDisplay = document.getElementById("timer");
 const controlBtn = document.getElementById("controlBtn");
 const timerSound = document.getElementById("timerSound");
@@ -185,25 +220,12 @@ if (Notification.permission !== "granted") {
 // Show a notification when the timer starts
 function showStartNotification() {
     if (Notification.permission === "granted") {
-        new Notification("Pomodoro Timer", {
-            body: "Your Pomodoro session has started! Stay focused!",
-            icon: "https://example.com/timer-icon.png" // Optional: Add an icon URL
+        new Notification("Timer Started", {
+            body: "Your timer has started!",
+            icon: "timer-icon.png" // Optional: Add an icon URL
         });
     }
 }
-
-// Call showStartNotification when the timer starts
-showStartNotification();
-
-// Block notifications while the timer is running
-function blockNotifications() {
-    if (Notification.permission === "granted") {
-        console.log("Notifications are blocked during the timer session.");
-    }
-}
-
-// Call blockNotifications when the timer starts
-blockNotifications();
 
 // Play sound when timer ends
 function playTimerCompleteSound() {
@@ -213,11 +235,13 @@ function playTimerCompleteSound() {
     });
 }
 
+// Update the circle progress
 function setProgress(percent) {
     const offset = circumference - (percent / 100 * circumference);
     circle.style.strokeDashoffset = offset;
 }
 
+// Update the timer display
 function updateTimerDisplay() {
     let mins = Math.floor(seconds / 60);
     let secs = seconds % 60;
@@ -226,6 +250,7 @@ function updateTimerDisplay() {
     setProgress(percent);
 }
 
+// Handle timer update
 function updateTimer() {
     if (seconds > 0) {
         seconds--;
@@ -234,8 +259,19 @@ function updateTimer() {
         clearInterval(intervalId);
         // Play completion sound before redirecting
         playTimerCompleteSound();
-        elapsedTime += (Date.now() - startTime) / 1000;
+        
+        if (startTime) {
+            elapsedTime += (Date.now() - startTime) / 1000;
+        }
         const actualDuration = Math.round(elapsedTime);
+        
+        // Show notification when timer ends
+        if (Notification.permission === "granted") {
+            new Notification("Timer Complete", {
+                body: "Your timer has finished!",
+                icon: "timer-icon.png"
+            });
+        }
         
         // Delay redirect to allow sound to play
         setTimeout(() => {
@@ -244,22 +280,31 @@ function updateTimer() {
     }
 }
 
+// Update the timer display initially
+updateTimerDisplay();
+
+// Toggle timer
 controlBtn.addEventListener("click", function() {
     isPaused = !isPaused;
     if (isPaused) {
         clearInterval(intervalId);
-        elapsedTime += (Date.now() - startTime) / 1000;
-        this.innerHTML = "▶ ";
+        if (startTime) {
+            elapsedTime += (Date.now() - startTime) / 1000;
+        }
+        this.innerHTML = "▶";
     } else {
-        this.innerHTML = "⏸";
         startTime = Date.now();
+        this.innerHTML = "⏸";
         intervalId = setInterval(updateTimer, 1000);
+        // Show notification when timer starts
+        showStartNotification();
     }
 });
 
+// Handle close button
 document.querySelector(".close-icon").addEventListener("click", function() {
-    if (confirm("Are you sure you want to cancel this Pomodoro session?")) {
-        if (!isPaused) {
+    if (confirm("Are you sure you want to cancel this timer session?")) {
+        if (!isPaused && startTime) {
             elapsedTime += (Date.now() - startTime) / 1000;
         }
         if (elapsedTime > 5) {
