@@ -1,4 +1,5 @@
 <?php
+include 'theme.php'; // Include theme.php at the very top
 $task_id = $_GET['task_id'];
 $mode = $_GET['mode'] ?? 'standard';
 $custom_duration = $_GET['duration'] ?? null;
@@ -35,13 +36,45 @@ if ($custom_duration) {
 $display_minutes = $work_duration / 60;
 
 // Store session info in a session variable
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['pomodoro_count'])) {
     $_SESSION['pomodoro_count'] = 0;
 }
 if (!isset($_SESSION['sessions_until_long_break'])) {
     $_SESSION['sessions_until_long_break'] = $sessions_until_long_break;
 }
+
+// Define theme-specific timer colors
+switch ($theme) {
+    case 'dark':
+        $timerBgColor = "#3a3a3a";
+        $timerProgressColor = "#e53935";
+        break;
+    case 'green':
+        $timerBgColor = "#e0e0e0";
+        $timerProgressColor = "#2e8b57";
+        break;
+    case 'light':
+        $timerBgColor = "#f5f5f5";
+        $timerProgressColor = "#c49700";
+        break;
+    case 'blue':
+        $timerBgColor = "#e3f2fd";
+        $timerProgressColor = "#1976d2";
+        break;
+    case 'solarized':
+        $timerBgColor = "#eee8d5";
+        $timerProgressColor = "#b58900";
+        break;
+    default:
+        $timerBgColor = "#3a3a3a";
+        $timerProgressColor = "#e53935";
+}
+
+// Set label color based on theme
+$labelColor = ($theme === 'dark') ? '#aaa' : '#666';
 ?>
 <!DOCTYPE html>
 <html>
@@ -50,8 +83,8 @@ if (!isset($_SESSION['sessions_until_long_break'])) {
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #1e1e1e;
-            color: #ffffff;
+            background-color: <?= $bodyBg ?>;
+            color: <?= $textColor ?>;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -62,7 +95,7 @@ if (!isset($_SESSION['sessions_until_long_break'])) {
         .timer-container {
             text-align: center;
             width: 300px;
-            background-color: #2d2d2d;
+            background-color: <?= $cardBg ?>;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -76,7 +109,7 @@ if (!isset($_SESSION['sessions_until_long_break'])) {
         .app-title {
             font-size: 18px;
             font-weight: bold;
-            color: #4CAF50;
+            color: <?= $accent ?>;
             margin: 0;
         }
         .close-icon {
@@ -94,10 +127,10 @@ if (!isset($_SESSION['sessions_until_long_break'])) {
             stroke-width: 8;
         }
         .timer-background {
-            stroke: #3a3a3a;
+            stroke: <?= $timerBgColor ?>;
         }
         .timer-progress {
-            stroke: #e53935;
+            stroke: <?= $timerProgressColor ?>;
             stroke-linecap: round;
             transform: rotate(-90deg);
             transform-origin: center;
@@ -117,17 +150,16 @@ if (!isset($_SESSION['sessions_until_long_break'])) {
         }
         .timer-label {
             font-size: 14px;
-            color: #aaa;
+            color: <?= $labelColor ?>;
             text-transform: uppercase;
             margin-top: 5px;
         }
         .control-button {
-            background: none;
             border: none;
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background-color: #3a3a3a;
+            background-color: <?= $accent ?>;
             color: white;
             font-size: 16px;
             display: flex;
@@ -135,30 +167,43 @@ if (!isset($_SESSION['sessions_until_long_break'])) {
             justify-content: center;
             margin: 0 auto;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
         .control-button:hover {
-            background-color: #4a4a4a;
+            background-color: <?= $hoverAccent ?>;
         }
         .session-info {
             margin-top: 15px;
             font-size: 12px;
-            color: #aaa;
+            color: <?= $labelColor ?>;
         }
         .mode-badge {
-            background-color: #4a4a4a;
+            background-color: <?= $accent ?>22; /* Using hex opacity for background */
             padding: 3px 8px;
             border-radius: 10px;
             font-size: 12px;
             margin-top: 10px;
             display: inline-block;
+            color: <?= $textColor ?>;
         }
         a {
-            color: #4CAF50;
+            color: <?= $accent ?>;
             text-decoration: none;
             font-size: 12px;
-            margin-top: 10px;
+            margin-top: 15px;
             display: block;
+        }
+        .volume-control {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .volume-control label {
+            margin-right: 10px;
+            font-size: 12px;
+        }
+        .volume-control input {
+            width: 80px;
         }
     </style>
 </head>
@@ -178,15 +223,30 @@ if (!isset($_SESSION['sessions_until_long_break'])) {
             <p class="timer-label">WORK</p>
         </div>
     </div>
-    <button id="controlBtn" class="control-button">
-        ▶
-    </button>
+    <button id="controlBtn" class="control-button">▶</button>
+    
+    <!-- Volume control -->
+    <div class="volume-control">
+        <label for="volume">🔊</label>
+        <input type="range" id="volume" min="0" max="1" step="0.1" value="0.7">
+    </div>
+    
+    <!-- Audio element for the timer completion sound -->
+    <audio id="timerSound" preload="auto">
+        <source src="timer-sound.mp3" type="audio/mpeg">
+        <!-- Fallback sound format -->
+        <source src="timer-sound.ogg" type="audio/ogg">
+        Your browser does not support the audio element.
+    </audio>
+    
     <div class="session-info">
         <span class="mode-badge"><?= ucfirst($mode) ?> Mode</span>
         <p>Session <?= $_SESSION['pomodoro_count'] + 1 ?> of <?= $_SESSION['sessions_until_long_break'] ?></p>
     </div>
+    
     <a href="index.php">⬅ Back to Tasks</a>
 </div>
+
 <script>
 // Circle properties
 const circle = document.getElementById('progress-ring');
@@ -206,9 +266,36 @@ let isPaused = true;
 let intervalId = null;
 const timerDisplay = document.getElementById("timer");
 const controlBtn = document.getElementById("controlBtn");
+const timerSound = document.getElementById("timerSound");
+const volumeControl = document.getElementById("volume");
 
-// Update the timer display initially
-updateTimerDisplay();
+// Set volume based on range input
+volumeControl.addEventListener("input", function() {
+    timerSound.volume = this.value;
+});
+
+// Request notification permission
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
+
+// Show a notification when the timer starts
+function showStartNotification() {
+    if (Notification.permission === "granted") {
+        new Notification("Pomodoro Timer", {
+            body: "Your Pomodoro session has started! Stay focused!",
+            icon: "timer-icon.png" // Optional: Add an icon URL
+        });
+    }
+}
+
+// Play sound when timer ends
+function playTimerCompleteSound() {
+    timerSound.currentTime = 0; // Reset to start of audio file
+    timerSound.play().catch(error => {
+        console.error("Error playing sound:", error);
+    });
+}
 
 // Update the circle progress
 function setProgress(percent) {
@@ -225,6 +312,31 @@ function updateTimerDisplay() {
     setProgress(percent);
 }
 
+// Handle timer update
+function updateTimer() {
+    if (seconds > 0) {
+        seconds--;
+        updateTimerDisplay();
+    } else {
+        clearInterval(intervalId);
+        // Play completion sound before redirecting
+        playTimerCompleteSound();
+        
+        if (startTime) {
+            elapsedTime += (Date.now() - startTime) / 1000;
+        }
+        const actualDuration = Math.round(elapsedTime);
+        
+        // Delay redirect to allow sound to play
+        setTimeout(() => {
+            window.location.href = `log_session.php?task_id=<?= $task_id ?>&duration=${actualDuration}`;
+        }, 1500); // Wait 1.5 seconds before redirecting
+    }
+}
+
+// Update the timer display initially
+updateTimerDisplay();
+
 // Toggle timer
 controlBtn.addEventListener("click", function() {
     isPaused = !isPaused;
@@ -233,28 +345,30 @@ controlBtn.addEventListener("click", function() {
         if (startTime) {
             elapsedTime += (Date.now() - startTime) / 1000;
         }
-        this.innerHTML = "▶ ";
+        this.innerHTML = "▶";
     } else {
         startTime = Date.now();
         this.innerHTML = "⏸";
         intervalId = setInterval(updateTimer, 1000);
+        // Show notification when timer starts
+        showStartNotification();
     }
 });
 
-// Handle timer update
-function updateTimer() {
-    if (seconds > 0) {
-        seconds--;
-        updateTimerDisplay();
-    } else {
-        clearInterval(intervalId);
-        elapsedTime += (Date.now() - startTime) / 1000;
-        const actualDuration = Math.round(elapsedTime);
-        setTimeout(() => {
+// Handle close button
+document.querySelector(".close-icon").addEventListener("click", function() {
+    if (confirm("Are you sure you want to cancel this Pomodoro session?")) {
+        if (!isPaused && startTime) {
+            elapsedTime += (Date.now() - startTime) / 1000;
+        }
+        if (elapsedTime > 5) {
+            const actualDuration = Math.round(elapsedTime);
             window.location.href = `log_session.php?task_id=<?= $task_id ?>&duration=${actualDuration}`;
-        }, 1500);
+        } else {
+            window.location.href = "index.php";
+        }
     }
-}
+});
 </script>
 </body>
 </html>
